@@ -30,3 +30,47 @@
 *.exe
 *.out
 *.app
+
+# Ignore compiled files and build artifacts
+*.o
+*.lo
+*.la
+*.lai
+*.obj
+*.p
+*.plo
+*.plg
+*.exe
+*.dll
+*.so
+*.dylib
+*.a
+*.out
+*.app
+*.app.dSYM/
+*.dylib
+*.pbxuser
+*.xcuserstate
+*.suo
+*.user
+*.userprefs
+*.sdf
+*.opensdf
+*.VC.db
+*.sln.docstates
+
+# Ignore macOS .DS_Store files
+.DS_Store
+
+# Ignore Visual Studio files
+.vscode/
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+*.vcproj
+
+# Ignore Xcode files
+*.xcodeproj/
+*.xcworkspace/
+*.xcuserdatad/
