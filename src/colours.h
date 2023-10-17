@@ -1,6 +1,6 @@
 //
 //  colours.h
-//  OSC_MIDI_OSC
+//  Synthetic Ornithology player
 //
 //  Created by Fred Rodrigues on 03/10/2023.
 //

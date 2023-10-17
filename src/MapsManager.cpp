@@ -1,6 +1,6 @@
 //
 //  MapsManager.cpp
-//  OSC_MIDI_OSC
+//  Synthetic Ornithology player
 //
 //  Created by Fred Rodrigues on 02/10/2023.
 //
@@ -61,12 +61,8 @@ void MapsManager::update(){
     
     if (!ofIsFloatEqual(animation, 0.f))
         tileLayer->setCenter(tileLayer->getCenter().getNeighbor(animation, 0));
-}
-
-void MapsManager::draw(){
-    fbo.begin();
-    ofClear(0);
     
+    fbo.begin();
     tileLayer->draw(0, 0);
     ofPushStyle();
     ofNoFill();
@@ -79,8 +75,13 @@ void MapsManager::draw(){
     }
     ofPopStyle();
     fbo.end();
-    fbo.draw(0, 400);
     ndiManager.getMapSender().SendImage(fbo);
+}
+
+void MapsManager::draw(){
+    
+    fbo.draw(ofGetWidth() -600, ofGetHeight()-600);
+    
     
     
     ofDrawBitmapStringHighlight(tileLayer->getCenter().toString(0), 14, ofGetHeight() - 32);

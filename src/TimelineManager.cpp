@@ -1,6 +1,6 @@
 //
 //  TimelineManager.cpp
-//  OSC_MIDI_OSC
+//  Synthetic Ornithology player
 //
 //  Created by Fred Rodrigues on 02/10/2023.
 //
@@ -21,24 +21,23 @@ void TimelineManager::setup(){
     ofLogNotice("TimelineManager") << "TimelineManager setup";
     
     timeline.setup();
-
-    timeline.addVideoTrack("fingers", "fingers.mov");
+    timeline.setWidth(ofGetWidth());
 
     timeline.addAudioTrack("audio", "4chan.wav");
-    timeline.setDurationInSeconds(timeline.getAudioTrack("audio")->getDuration());
-
-    timeline.addCurves("curves", ofRange(0, 255));
-    timeline.addBangs("bangs");
-    timeline.addFlags("flags");
-    timeline.addColors("colors");
-    timeline.addLFO("lfo");
+    timeline.setDurationInSeconds(TimelineManagerSettings["main_duration_seconds"]);
+    timeline.addCurves("Unixtime", ofRange(TimelineManagerSettings["start_time_unix"], TimelineManagerSettings["end_time_unix"]));
+    
+//    timeline.addBangs("bangs");
+//    timeline.addFlags("flags");
+//    timeline.addColors("colors");
+//    timeline.addLFO("lfo");
     timeline.addSwitches("switches");
-
-    timeline.setPageName("Page 1");
-    timeline.addPage("Page 2");
-    timeline.addPage("Page 3");
-    timeline.addPage("Page 4");
-    timeline.setCurrentPage(0);
+//
+//    timeline.setPageName("Page 1");
+//    timeline.addPage("Page 2");
+//    timeline.addPage("Page 3");
+//    timeline.addPage("Page 4");
+//    timeline.setCurrentPage(0);
 
     timeline.enableSnapToOtherKeyframes(false);
     timeline.setLoopType(OF_LOOP_NORMAL);
@@ -50,6 +49,8 @@ void TimelineManager::setup(){
 }
 
 void TimelineManager::update(){
+  
+    specualtiveTime = unixTimeToHumanReadable(timeline.getValue("Unixtime"));
     
 }
 
@@ -61,6 +62,13 @@ void TimelineManager::draw(){
         ofBackground(255*.15);
     }
     timeline.draw();
+}
+
+void TimelineManager::disableInteraction(){
+    timeline.disableEvents();
+}
+void TimelineManager::enableInteraction(){
+    timeline.enableEvents();
 }
 
 void TimelineManager::bangFired(ofxTLBangEventArgs& args){
@@ -97,3 +105,15 @@ void TimelineManager::setTimelineManagerSettings(const ofJson& updatedSettings) 
 }
 
 
+std::string TimelineManager::unixTimeToHumanReadable(long long unixTime) {
+    // Convert Unix timestamp to a time_point
+    std::chrono::system_clock::time_point tp = std::chrono::system_clock::from_time_t(unixTime);
+
+    // Convert time_point to a time_t (not necessary, but useful for printing)
+    std::time_t tt = std::chrono::system_clock::to_time_t(tp);
+
+    // Format the time as a human-readable string
+    std::string timeStr = std::ctime(&tt);
+
+    return timeStr;
+}

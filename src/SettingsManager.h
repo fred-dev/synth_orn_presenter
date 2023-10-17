@@ -1,6 +1,6 @@
 //
 //  SettingsManager.h
-//  OSC_MIDI_OSC
+//  Synthetic Ornithology player
 //
 //  Created by Fred Rodrigues on 02/10/2023.
 //
@@ -31,7 +31,7 @@ public:
     // Connect a slot (a function) to the signal
     void connectSettingsChanged(SettingsChangedSignal slot);
 
-    void saveSettings(const std::string& filename, ofJson remoteSettings);
+    void saveSettings();
     void updateSettings(ofJson remoteSettings);
 
 private:
@@ -39,10 +39,13 @@ private:
 
     ofJson settings;
     std::vector<SettingsChangedSignal> settingsChangeListeners;
+    std::string settingsPath;
+
 
     void setDefaultSettings();
 
     // Helper function to notify connected slots when settings change
     void notifySettingsChanged();
+    bool loadSettingsFromJSON(std::string key);
 };
 

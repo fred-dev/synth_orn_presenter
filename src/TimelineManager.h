@@ -1,6 +1,6 @@
 //
 //  TimelineManager.h
-//  OSC_MIDI_OSC
+//  Synthetic Ornithology player
 //
 //  Created by Fred Rodrigues on 02/10/2023.
 //
@@ -13,6 +13,10 @@
 #include "SettingsManager.h" // Include the SettingsManager header
 #include "ofxTextInputField.h"
 #include "ofxTimeline.h"
+#include <iostream>
+#include <ctime>
+#include <chrono>
+
 
 class TimelineManager {
 public:
@@ -35,12 +39,19 @@ public:
 
     void updateSettings();
     void setTimelineManagerSettings(const ofJson& newSettings);
+    void disableInteraction();
+    void enableInteraction();
+    std::string getSpecualtiveTime() {return specualtiveTime;};
+    
 private:
     TimelineManager();
     ofxTimeline timeline;
     void bangFired(ofxTLBangEventArgs& args);
 
     ofJson TimelineManagerSettings;
+    
+    std::string unixTimeToHumanReadable(long long unixTime);
+    std::string specualtiveTime;
 
     // Function to handle settings changes
     void handleSettingsChange(const ofJson& updatedSettings) {
@@ -49,5 +60,6 @@ private:
         // Perform any other actions you need to do when settings change
         // This function will be called automatically when settings change.
     }
+    
 };
 

@@ -1,6 +1,6 @@
 //
 //  NDIManager.cpp
-//  OSC_MIDI_OSC
+//  Synthetic Ornithology player
 //
 //  Created by Fred Rodrigues on 02/10/2023.
 //
@@ -25,16 +25,16 @@ void NDIManager::setup(){
     }
     
     mapSender.SetAsync();
-    mapSender.CreateSender(mapSenderName.c_str(), 600, 600);
+    mapSender.CreateSender(mapSenderName.c_str(), NDIManagerSettings["map_render_width"] , NDIManagerSettings["map_render_height"]);
     
     textSender1.SetAsync();
-    textSender1.CreateSender(textSenderName1.c_str(), 600, 600);
+    textSender1.CreateSender(textSenderName1.c_str(), NDIManagerSettings["text_renderer_1_width"] , NDIManagerSettings["text_renderer_1_height"]);
     
     textSender2.SetAsync();
-    textSender2.CreateSender(textSenderName2.c_str(), 600, 600);
+    textSender2.CreateSender(textSenderName2.c_str(), NDIManagerSettings["text_renderer_2_width"] , NDIManagerSettings["text_renderer_2_height"]);
     
     graphicsSender.SetAsync();
-    graphicsSender.CreateSender(graphicsSenderName.c_str(), 600, 600);
+    graphicsSender.CreateSender(graphicsSenderName.c_str(), NDIManagerSettings["grapics_renderer_width"] , NDIManagerSettings["grapics_renderer_height"]);
 
     
     ofLogVerbose("NDIManager") << "NDIManager Setup complete";

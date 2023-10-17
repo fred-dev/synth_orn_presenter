@@ -8,7 +8,7 @@
 #include "TimelineManager.h"
 #include "colours.h"
 #include "ofxBezierEditor.h"
-
+#include "TextRenderManager.h"
 
 enum OperationMode {
     MODE_SETTING_MIDI_IN,
@@ -36,35 +36,36 @@ enum buttonMesssages {
 
 
 class ofApp : public ofBaseApp {
-
-    public:
-		void setup();
-		void update();
-		void draw();
-        void exit();
-		void keyPressed(int key);
-		void keyReleased(int key);
-		void mouseMoved(int x, int y );
-		void mouseDragged(int x, int y, int button);
-		void mousePressed(int x, int y, int button);
-		void mouseReleased(int x, int y, int button);
-		void windowResized(int w, int h);
-		void gotMessage(ofMessage msg);
     
-        SettingsManager& settingsManager = SettingsManager::getInstance();
-        NDIManager& NDIManager = NDIManager::getInstance();
-        OscManager& oscManager = OscManager::getInstance();
-        MapsManager& mapsManager = MapsManager::getInstance();
-        TimelineManager& timelineManager = TimelineManager::getInstance();
+public:
+    void setup();
+    void update();
+    void draw();
+    void exit();
+    void keyPressed(int key);
+    void keyReleased(int key);
+    void mouseMoved(int x, int y );
+    void mouseDragged(int x, int y, int button);
+    void mousePressed(int x, int y, int button);
+    void mouseReleased(int x, int y, int button);
+    void windowResized(int w, int h);
+    void gotMessage(ofMessage msg);
+    
+    SettingsManager& settingsManager = SettingsManager::getInstance();
+    NDIManager& NDIManager = NDIManager::getInstance();
+    OscManager& oscManager = OscManager::getInstance();
+    MapsManager& mapsManager = MapsManager::getInstance();
+    TimelineManager& timelineManager = TimelineManager::getInstance();
+    TextRenderManager& textRenderManager = TextRenderManager::getInstance();
     
     
-        ofJson appSettings;
-        
-        std::string activityMessage;
+    ofJson appSettings;
+    
+    std::string activityMessage;
     
     ofTrueTypeFont font;
     // Helper function to handle port selection
-
+    
     
     std::unordered_map<std::string, int> buttonMessagesMap = {
         {"BTN_MSG_MIDI_IN_PORT_SET", 0},
@@ -80,10 +81,10 @@ class ofApp : public ofBaseApp {
         {"BTN_MSG_GOTOMODE_MODE_SETTING_OSC_OUT", 10},
         {"BTN_MSG_GOTOMODE_MODE_CONVERSION", 11}
     };
-	
-  Colours colours;
+    
+    Colours colours;
     
     
-
+    
 };
 

@@ -1,6 +1,6 @@
 //
 //  GenericManager.cpp
-//  OSC_MIDI_OSC
+//  Synthetic Ornithology player
 //
 //  Created by Fred Rodrigues on 02/10/2023.
 //
