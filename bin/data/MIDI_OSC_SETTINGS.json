@@ -1,0 +1,16 @@
+{
+    "Log_level": 0,
+    "frameRate": 25,
+    "incomingPortOsc": 12345,
+    "midiInChannel": 1,
+    "midiInDevice": 0,
+    "midiInDeviceByString": false,
+    "midiInDeviceNum": null,
+    "midiOutChannel": 1,
+    "midiOutDevice": 0,
+    "midiOutDeviceByString": false,
+    "midiOutDeviceNum": null,
+    "outGoingPortOsc": 1234,
+    "outgoingIpOSC": "127.0.0.1",
+    "useVirtualPort": true
+}
