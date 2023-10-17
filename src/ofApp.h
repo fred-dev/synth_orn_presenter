@@ -8,7 +8,7 @@
 #include "ofxTextInputField.h"
 #include "ofxTimeline.h"
 #include "colours.h"
-
+#include "ofxBezierEditor.h"
 
 
 enum OperationMode {

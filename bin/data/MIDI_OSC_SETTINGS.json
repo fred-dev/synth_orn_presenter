@@ -12,5 +12,5 @@
     "midiOutDeviceNum": null,
     "outGoingPortOsc": 1234,
     "outgoingIpOSC": "127.0.0.1",
-    "useVirtualPort": true
+    "useVirtualPort": false
 }

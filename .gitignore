@@ -74,3 +74,8 @@
 *.xcodeproj/
 *.xcworkspace/
 *.xcuserdatad/
+*.tlog
+
+/.vs/
+/.obj/
+/obj/
