@@ -7,7 +7,7 @@
 #include "MapsManager.h"
 #include "TimelineManager.h"
 #include "colours.h"
-
+#include "ofxBezierEditor.h"
 
 
 enum OperationMode {
