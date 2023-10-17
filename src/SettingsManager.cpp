@@ -10,6 +10,7 @@
 SettingsManager::SettingsManager() {
     // Constructor code
     setDefaultSettings();
+    cout<<"Settings Constrcutor"<< endl;
 }
 
 
@@ -112,6 +113,8 @@ void SettingsManager::loadSettings(const std::string& filename) {
         ofLogError("SettingsManager::LoadSettings") << "Settings file not found: " << filename;
         setDefaultSettings();
     }
+    notifySettingsChanged(); // Notify all connected slots that settings have changed
+
 }
 
 ofJson SettingsManager::getSettings() const {
@@ -155,20 +158,25 @@ void SettingsManager::setDefaultSettings() {
 
     settings["frameRate"] = 25;
     ofLogVerbose("SettingsManager::setDefaultSettings") << "frameRate set to " << settings["frameRate"] << endl;
+    notifySettingsChanged(); // Notify all connected slots that settings have changed
+
 }
 
-void SettingsManager::saveSettings(const std::string& filename, ofJson remoteSettings){
+void SettingsManager::updateSettings(ofJson remoteSettings) {
     settings = remoteSettings;
-    
-    ofLogVerbose("SettingsManager::saveSettings") << "Saving settings to " << filename << endl;
-    ofSavePrettyJson(filename, settings);
+    saveSettings("MIDI_OSC_SETTINGS.json", settings); // Save the updated settings
+    notifySettingsChanged(); // Notify all connected slots that settings have changed
 }
 
-void SettingsManager::updateSettings(ofJson remoteSettings){
-    settings = remoteSettings;
-    ofLogVerbose("SettingsManager::updateSettings") << "Settings updated" << endl;
+void SettingsManager::notifySettingsChanged() {
+    for (const auto& listener : settingsChangeListeners) {
+        listener(settings);
+    }
 }
 //public destructor
 SettingsManager::~SettingsManager() {
 	// Destructor code
+}
+void SettingsManager::connectSettingsChanged(SettingsChangedSignal slot) {
+    settingsChangeListeners.push_back(slot);
 }

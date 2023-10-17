@@ -5,8 +5,7 @@
 #include "NDIManager.h"
 #include "OscManager.h"
 #include "MapsManager.h"
-#include "ofxTextInputField.h"
-#include "ofxTimeline.h"
+#include "TimelineManager.h"
 #include "colours.h"
 
 
@@ -42,7 +41,7 @@ class ofApp : public ofBaseApp {
 		void setup();
 		void update();
 		void draw();
-
+        void exit();
 		void keyPressed(int key);
 		void keyReleased(int key);
 		void mouseMoved(int x, int y );
@@ -56,6 +55,8 @@ class ofApp : public ofBaseApp {
         NDIManager& NDIManager = NDIManager::getInstance();
         OscManager& oscManager = OscManager::getInstance();
         MapsManager& mapsManager = MapsManager::getInstance();
+        TimelineManager& timelineManager = TimelineManager::getInstance();
+    
     
         ofJson appSettings;
         
@@ -82,8 +83,7 @@ class ofApp : public ofBaseApp {
 	
   Colours colours;
     
-    ofxTimeline timeline;
-    void bangFired(ofxTLBangEventArgs& args);
+    
 
 };
 

@@ -1,4 +1,5 @@
 ofxAudioFile
+ofxBezierEditor
 ofxPoco
 ofxIO
 ofxSQLiteCpp

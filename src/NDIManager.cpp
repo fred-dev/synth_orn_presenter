@@ -8,48 +8,78 @@
 #include "NDIManager.h"
 
 NDIManager::NDIManager() {
-    
+    updateSettings();
+    ofLogVerbose("NDIManager") << "Constructor called" << endl;
 }
+
+NDIManager::~NDIManager() {
+    
+    ofLogVerbose("NDIManager") << "Destructor called" << endl;
+}
+
 void NDIManager::setup(){
     ofLogNotice("NDIManager") << "NDIManager setup";
-    // Get the instance of SettingsManager
-    SettingsManager & settingsManager = SettingsManager::getInstance();
     
-    // Access the settings
-    NDIManagerSettings = settingsManager.getSettings();
-    
-    if (NDIManagerSettings["useVirtualPort"]) {
-        
-    } else {
-        if (NDIManagerSettings["midiOutDevice"].is_string()) {
-            
-        }
-        
-        if (NDIManagerSettings["midiInDevice"].is_string()) {
-            //Check if the port from the settings exists
-            
-        }
+    if (NDIManagerSettings["NDI"]["NDI_MAP_STREAM_LABEL"].is_string()) {
         
     }
-
- 
-
-    settingsManager.saveSettings("MIDI_OSC_SETTINGS.json", NDIManagerSettings);
     
+    mapSender.SetAsync();
+    mapSender.CreateSender(mapSenderName.c_str(), 600, 600);
     
-    ofLogVerbose("NDIManager") << "NDIManager constructor called, midi out port: ";
+    textSender1.SetAsync();
+    textSender1.CreateSender(textSenderName1.c_str(), 600, 600);
+    
+    textSender2.SetAsync();
+    textSender2.CreateSender(textSenderName2.c_str(), 600, 600);
+    
+    graphicsSender.SetAsync();
+    graphicsSender.CreateSender(graphicsSenderName.c_str(), 600, 600);
+
+    
+    ofLogVerbose("NDIManager") << "NDIManager Setup complete";
     
 }
-void NDIManager::close(){
 
-}
-//destructors
-NDIManager::~NDIManager() {
-
-	ofLogVerbose("NDIManager") << "Destructor called" << endl;
+void NDIManager::update(){
+    
 }
 
-void NDIManager::updateSettings(){
-    SettingsManager & settingsManager = SettingsManager::getInstance();
-    NDIManagerSettings = settingsManager.getSettings();
+void NDIManager::draw(){
+    
 }
+
+void NDIManager::exit(){
+    ofLogVerbose("NDIManager") << "Exit";
+    mapSender.ReleaseSender();
+    textSender1.ReleaseSender();
+    textSender2.ReleaseSender();
+    graphicsSender.ReleaseSender();
+}
+
+
+void NDIManager::updateSettings() {
+    // Connect a slot to listen for settings changes
+    SettingsManager::getInstance().connectSettingsChanged([this](const ofJson& updatedSettings) {
+        // Call the handleSettingsChange function in NDIManager
+        handleSettingsChange(updatedSettings);
+    });
+}
+
+void NDIManager::setNDIManagerSettings(const ofJson& updatedSettings) {
+    // Merge the updated settings with the current NDIManagerSettings
+    for (auto it = updatedSettings.begin(); it != updatedSettings.end(); ++it) {
+        const std::string& key = it.key();
+        const ofJson& newValue = it.value();
+        
+        // Check if the new value is different from the current value
+        if (NDIManagerSettings[key] != newValue) {
+            NDIManagerSettings[key] = newValue;
+        }
+    }
+    
+    // Update the main settings managed by the SettingsManager with the modified NDIManagerSettings
+    SettingsManager::getInstance().updateSettings(NDIManagerSettings);
+}
+
+

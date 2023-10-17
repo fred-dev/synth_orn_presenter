@@ -8,7 +8,7 @@
 #pragma once
 #include "ofMain.h"
 #include "ofxOsc.h"
-#include "NDIManager.h"
+#include "OscManager.h"
 #include "SettingsManager.h" // Include the SettingsManager header
 
 class OscManager {
@@ -18,32 +18,44 @@ public:
         return instance;
     }
 
-    // Delete copy and move constructors and assignment operators
+    // Delete copy constructor and assignment operator
     OscManager(OscManager const&) = delete;
-    OscManager(OscManager&&) = delete;
     void operator=(OscManager const&) = delete;
-    void operator=(OscManager&&) = delete;
     
     void setup();
+    void update();
+    void draw();
+    void exit();
+
+    // Public destructor
+    ~OscManager();
+
+    void updateSettings();
+    void setOscManagerSettings(const ofJson& newSettings);
+    ofxOscSender& getOSCSender() { return oscSender; }
+    ofxOscReceiver& getOscReciever() { return oscReceiver; }
+    
     void closeReceiver();
     void setupReceiver();
     void closeSender();
     void setupSender();
-    
-    ofxOscSender& getOSCSender() { return oscSender; }
-    ofxOscReceiver& getOscReciever() { return oscReceiver; }
-    
     void handleIncomingMessages();
-  
-    //public destructor
-	~OscManager();
-    void updateSettings();
 
+    
 private:
-    OscManager(); // Constructor is private now
+    OscManager();
 
-    ofJson oscManagerSettings;
+    ofJson OscManagerSettings;
     string message;
     ofxOscSender oscSender;
     ofxOscReceiver oscReceiver;
+    // Function to handle settings changes
+    void handleSettingsChange(const ofJson& updatedSettings) {
+        
+        // Update your OscManagerSettings with the new settings
+        OscManagerSettings = updatedSettings;
+        // Perform any other actions you need to do when settings change
+        // This function will be called automatically when settings change.
+    }
 };
+

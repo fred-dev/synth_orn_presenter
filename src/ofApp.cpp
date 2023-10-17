@@ -4,65 +4,35 @@
 void ofApp::setup() {
     ofSetLogLevel(OF_LOG_VERBOSE);
     font.load("frabk.ttf", 14);
+    ofBackground(255*.15);
+    ofSetVerticalSync(true);
+    ofEnableSmoothing();
+    
     settingsManager.loadSettings("MIDI_OSC_SETTINGS.json");
     appSettings = settingsManager.getSettings();
     NDIManager.setup();
     oscManager.setup();
     mapsManager.setup();
-    
-    ofBackground(255*.15);
-    ofSetVerticalSync(true);
-    ofEnableSmoothing();
-
-    timeline.setup();
-
-    timeline.addVideoTrack("fingers", "fingers.mov");
-
-  #ifdef TIMELINE_AUDIO_INCLUDED
-    timeline.addAudioTrack("audio", "4chan.wav");
-    timeline.setDurationInSeconds(timeline.getAudioTrack("audio")->getDuration());
-  #endif
-
-    timeline.addCurves("curves", ofRange(0, 255));
-    timeline.addBangs("bangs");
-    timeline.addFlags("flags");
-    timeline.addColors("colors");
-    timeline.addLFO("lfo");
-    timeline.addSwitches("switches");
-
-    timeline.setPageName("Page 1");
-    timeline.addPage("Page 2");
-    timeline.addPage("Page 3");
-    timeline.addPage("Page 4");
-    timeline.setCurrentPage(0);
-
-    timeline.enableSnapToOtherKeyframes(false);
-    timeline.setLoopType(OF_LOOP_NORMAL);
-    
-    ofAddListener(timeline.events().bangFired, this, &ofApp::bangFired);
-
-  
+    timelineManager.setup();
 }
 
 //--------------------------------------------------------------
 void ofApp::update() {
     oscManager.handleIncomingMessages();
     mapsManager.update();
+    timelineManager.update();
 }
 
 //--------------------------------------------------------------
 void ofApp::draw() {
-    if(timeline.isSwitchOn("switches")){
-        ofBackground(timeline.getColor("colors"));
-    }
-    else{
-        ofBackground(255*.15);
-    }
-    timeline.draw();
+    timelineManager.draw();
+    
     mapsManager.draw();
 }
-void ofApp::bangFired(ofxTLBangEventArgs& args){
-    cout << "bang fired!" << args.flag << endl;
+
+//--------------------------------------------------------------
+void ofApp::exit(){
+
 }
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key) {
@@ -121,35 +91,30 @@ void ofApp::gotMessage(ofMessage msg) {
             case BTN_MSG_MIDI_IN_PORT_SET:
                 appSettings["midiInDevice"] =  appSettings["inPortLabel"].get<string>();
                 appSettings["midiInDeviceByString"] =  true;
-                settingsManager.saveSettings("MIDI_OSC_SETTINGS.json", appSettings);
-                NDIManager.close();
+                NDIManager.exit();
                 NDIManager.updateSettings();
                 NDIManager.setup();
                 break;
 
             case BTN_MSG_MIDI_IN_CHANNEL_SET:
-                settingsManager.saveSettings("MIDI_OSC_SETTINGS.json", appSettings);
                 NDIManager.updateSettings();
                 break;
 
             case BTN_MSG_MIDI_OUT_PORT_SET:
                 appSettings["midiOutDevice"] =  appSettings["outPortLabel"].get<string>();
                 appSettings["midiOutDeviceByString"] =  true;
-                settingsManager.saveSettings("MIDI_OSC_SETTINGS.json", appSettings);
-                NDIManager.close();
+                NDIManager.exit();
                 NDIManager.updateSettings();
                 NDIManager.setup();
                 
                 break;
 
             case BTN_MSG_MIDI_OUT_CHANNEL_SET:
-                settingsManager.saveSettings("MIDI_OSC_SETTINGS.json", appSettings);
                 NDIManager.updateSettings();
                 break;
 
             case BTN_MSG_OSC_IN_PORT_SET:
                 oscManager.closeReceiver();
-                settingsManager.saveSettings("MIDI_OSC_SETTINGS.json", appSettings);
                 oscManager.updateSettings();
                 oscManager.setupReceiver();
 
@@ -157,7 +122,6 @@ void ofApp::gotMessage(ofMessage msg) {
 
             case BTN_MSG_OST_OUT_PORT_SET:
                 oscManager.closeSender();
-                settingsManager.saveSettings("MIDI_OSC_SETTINGS.json", appSettings);
                 oscManager.updateSettings();
                 oscManager.setupSender();
 
@@ -165,7 +129,6 @@ void ofApp::gotMessage(ofMessage msg) {
 
             case BTN_MSG_OST_OUT_IP_SET:
                 oscManager.closeSender();
-                settingsManager.saveSettings("MIDI_OSC_SETTINGS.json", appSettings);
                 oscManager.setupSender();
                 break;
 

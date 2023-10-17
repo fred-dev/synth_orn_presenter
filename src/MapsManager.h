@@ -10,9 +10,8 @@
 #include <stdio.h>
 
 #include "ofMain.h"
-#include "ofxNdi.h"
 #include "SettingsManager.h" // Include the SettingsManager header
-#include "OscManager.h"
+#include "NDIManager.h"
 #include "ofxMaps.h"
 
 
@@ -26,24 +25,31 @@ public:
     // Delete copy constructor and assignment operator
     MapsManager(MapsManager const&) = delete;
     void operator=(MapsManager const&) = delete;
+    
     void setup();
-    void close();
     void update();
     void draw();
+    void exit();
     void keyPressed(int key);
-    
-    // Send MIDI message
-  
 
-    //public destructor
-	~MapsManager();
+    // Public destructor
+    ~MapsManager();
 
     void updateSettings();
-
+    void setMapsManagerSettings(const ofJson& newSettings);
 private:
     MapsManager();
-    
+
     ofJson MapsManagerSettings;
+
+    // Function to handle settings changes
+    void handleSettingsChange(const ofJson& updatedSettings) {
+        // Update your MapsManagerSettings with the new settings
+        MapsManagerSettings = updatedSettings;
+        // Perform any other actions you need to do when settings change
+        // This function will be called automatically when settings change.
+    }
+    
     ofFbo fbo;
 
     std::shared_ptr<ofxMaps::MBTilesCache> bufferCache;
@@ -54,9 +60,12 @@ private:
     std::vector<ofxGeo::Coordinate> coordinates;
 
     std::vector<std::string> sets;
+    
     int setsIndex = 0;
 
     float animation = 0;
+    
+    NDIManager& ndiManager = NDIManager::getInstance();
 
 };
 

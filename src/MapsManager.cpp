@@ -8,66 +8,33 @@
 #include "MapsManager.h"
 
 MapsManager::MapsManager() {
-    
+    updateSettings();
+    ofLogVerbose("MapsManager") << "Constructor called" << endl;
     
 }
+
+MapsManager::~MapsManager() {
+    
+    ofLogVerbose("MapsManager") << "Destructor called" << endl;
+}
+
 void MapsManager::setup(){
-    
     ofLogNotice("MapsManager") << "MapsManager setup";
-    // Get the instance of SettingsManager
-    SettingsManager & settingsManager = SettingsManager::getInstance();
-    
-    // Access the settings
-    MapsManagerSettings = settingsManager.getSettings();
     
     ofJson json = ofLoadJson("provider.json");
-    ofLogVerbose("MapsManager") << "Loaded Provider JSON";
-    
     tileProvider = std::make_shared<ofxMaps::MapTileProvider>(ofxMaps::MapTileProvider::fromJSON(json));
-    ofLogVerbose("MapsManager") << "Created Provider";
     
     Poco::ThreadPool::defaultPool().addCapacity(64);
     bufferCache = std::make_shared<ofxMaps::MBTilesCache>(*tileProvider, "cache/");
-    ofLogVerbose("MapsManager") << "Created Buffer cache";
     
     tileSet = std::make_shared<ofxMaps::MapTileSet>(1024,
                                                     tileProvider,
                                                     bufferCache);
-    ofLogVerbose("MapsManager") << "Created Tile set";
-    
-    
     tileLayer = std::make_shared<ofxMaps::MapTileLayer>(tileSet, 600, 600);
-    ofLogVerbose("MapsManager") << "Created Tile Layer";
-    
-    
-    ofxGeo::Coordinate chicago(41.8827, -87.6233);
-    ofLogVerbose("MapsManager") << "Created chicago";
-    
-    ofxGeo::Coordinate bethel(45.0579, -93.1605);
-    ofLogVerbose("MapsManager") << "Created bethel";
-    
-    
-    if (MapsManagerSettings["useVirtualPort"]) {
-        
-    } else {
-        if (MapsManagerSettings["midiOutDevice"].is_string()) {
-            
-        }
-        
-        if (MapsManagerSettings["midiInDevice"].is_string()) {
-            //Check if the port from the settings exists
-            
-        }
-        
-    }
-    
-    
-    
-    settingsManager.saveSettings("MIDI_OSC_SETTINGS.json", MapsManagerSettings);
-    
-    
+
     ofLogVerbose("MapsManager") << "MapsManager constructor called, midi out port: ";
     
+    fbo.allocate(600, 600, GL_RGBA);
     coordinates =
     {
         { 42.2610492, -91.4501953 },
@@ -84,15 +51,8 @@ void MapsManager::setup(){
     };
     
     tileLayer->setCenter(coordinates[3], 21);
-    ofLogVerbose("MapsManager") << "tileLayer->setCenter";
     
-    ofLogVerbose("MapsManager") << "Created Coordinates";
-    
-    fbo.allocate(600, 600, GL_RGBA);
-    
-    
-}
-void MapsManager::close(){
+    ofLogVerbose("MapsManager") << "MapsManager Setup complete";
     
 }
 
@@ -101,12 +61,12 @@ void MapsManager::update(){
     
     if (!ofIsFloatEqual(animation, 0.f))
         tileLayer->setCenter(tileLayer->getCenter().getNeighbor(animation, 0));
-    
 }
+
 void MapsManager::draw(){
-   
     fbo.begin();
     ofClear(0);
+    
     tileLayer->draw(0, 0);
     ofPushStyle();
     ofNoFill();
@@ -120,23 +80,44 @@ void MapsManager::draw(){
     ofPopStyle();
     fbo.end();
     fbo.draw(0, 400);
-
+    ndiManager.getMapSender().SendImage(fbo);
+    
     
     ofDrawBitmapStringHighlight(tileLayer->getCenter().toString(0), 14, ofGetHeight() - 32);
     ofDrawBitmapStringHighlight("Task Queue:" + ofx::TaskQueue::instance().toString(), 14, ofGetHeight() - 16);
     ofDrawBitmapStringHighlight("Connection Pool: " + bufferCache->toString(), 14, ofGetHeight() - 2);
 }
 
-//destructors
-MapsManager::~MapsManager() {
+void MapsManager::exit(){
+    ofLogVerbose("MapsManager") << "Exit";
     
-    ofLogVerbose("MapsManager") << "Destructor called" << endl;
 }
 
-void MapsManager::updateSettings(){
-    SettingsManager & settingsManager = SettingsManager::getInstance();
-    MapsManagerSettings = settingsManager.getSettings();
+
+void MapsManager::updateSettings() {
+    // Connect a slot to listen for settings changes
+    SettingsManager::getInstance().connectSettingsChanged([this](const ofJson& updatedSettings) {
+        // Call the handleSettingsChange function in MapsManager
+        handleSettingsChange(updatedSettings);
+    });
 }
+
+void MapsManager::setMapsManagerSettings(const ofJson& updatedSettings) {
+    // Merge the updated settings with the current MapsManagerSettings
+    for (auto it = updatedSettings.begin(); it != updatedSettings.end(); ++it) {
+        const std::string& key = it.key();
+        const ofJson& newValue = it.value();
+        
+        // Check if the new value is different from the current value
+        if (MapsManagerSettings[key] != newValue) {
+            MapsManagerSettings[key] = newValue;
+        }
+    }
+    
+    // Update the main settings managed by the SettingsManager with the modified MapsManagerSettings
+    SettingsManager::getInstance().updateSettings(MapsManagerSettings);
+}
+
 
 void MapsManager::keyPressed(int key){
     
