@@ -9,7 +9,7 @@
     "main_duration_seconds": 360,
     "end_time_unix": 1729117179,
     "start_time_unix": 1697581179,
-    "timeline_years": 1
+    "timeline_years": 10
   },
   "renderer": {
     "text_renderer_1_height": 100,
@@ -108,12 +108,11 @@
         "lon": 147.336066
       }
     ],
-    "mapCentre": [
+    "mapCentre":
       {
         "lat": -24.978199,
         "lon": 133.100608
-      }
-    ],
+      },
     "provider": {
       "tilejson": "1.0.0",
       "name": "OpenStreetMap",

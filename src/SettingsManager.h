@@ -48,5 +48,8 @@ private:
     void notifySettingsChanged();
     bool loadSettingsFromJSON(std::string key);
     bool loadSettingsFromJSON(std::string key, std::string subKey1);
-    bool loadSettingsFromJSON(std::string key, std::string subKey1, std::string subKey2);};
+    bool loadSettingsFromJSON(std::string key, std::string subKey1, std::string subKey2);
+    template <typename T>
+    void setDefaultSetting(ofJson& settings, const std::string& key, const T& defaultValue);
+};
 

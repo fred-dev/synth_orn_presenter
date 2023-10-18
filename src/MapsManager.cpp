@@ -49,7 +49,7 @@ void MapsManager::setup(){
     }
     ofLogVerbose("MapsManager") << "coordinates Setup complete";
     
-    tileLayer->setCenter(ofxGeo::Coordinate(MapsManagerSettings["map"]["mapCentre"][0]["lat"],MapsManagerSettings["map"]["mapCentre"][0]["lon"]), 4);
+    tileLayer->setCenter(ofxGeo::Coordinate(MapsManagerSettings["map"]["mapCentre"]["lat"],MapsManagerSettings["map"]["mapCentre"]["lon"]), 4);
     
     ofLogVerbose("MapsManager") << "MapsManager Setup complete";
     
