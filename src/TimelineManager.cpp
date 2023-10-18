@@ -6,6 +6,8 @@
 //
 
 #include "TimelineManager.h"
+float TimelineManager::timelineProgress = 0.0f;
+int TimelineManager::mapZoom = 2;
 
 TimelineManager::TimelineManager() {
     updateSettings();
@@ -24,9 +26,10 @@ void TimelineManager::setup(){
     timeline.setWidth(ofGetWidth());
 
     timeline.addAudioTrack("audio", "4chan.wav");
-    timeline.setDurationInSeconds(TimelineManagerSettings["main_duration_seconds"]);
-    timeline.addCurves("Unixtime", ofRange(TimelineManagerSettings["start_time_unix"], TimelineManagerSettings["end_time_unix"]));
-    
+    timeline.setDurationInSeconds(TimelineManagerSettings["timeline"]["main_duration_seconds"]);
+    timeline.addCurves("Unixtime", ofRange(TimelineManagerSettings["timeline"]["start_time_unix"], TimelineManagerSettings["timeline"]["end_time_unix"]));
+    timeline.addCurves("MapZoom", ofRange(1, 20));
+
 //    timeline.addBangs("bangs");
 //    timeline.addFlags("flags");
 //    timeline.addColors("colors");
@@ -51,7 +54,8 @@ void TimelineManager::setup(){
 void TimelineManager::update(){
   
     specualtiveTime = unixTimeToHumanReadable(timeline.getValue("Unixtime"));
-    
+    timelineProgress = timeline.getPercentComplete();
+    mapZoom = timeline.getValue("MapZoom");
 }
 
 void TimelineManager::draw(){
@@ -117,3 +121,4 @@ std::string TimelineManager::unixTimeToHumanReadable(long long unixTime) {
 
     return timeStr;
 }
+

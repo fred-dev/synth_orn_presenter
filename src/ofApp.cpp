@@ -28,7 +28,9 @@ void ofApp::update() {
 //--------------------------------------------------------------
 void ofApp::draw() {
     timelineManager.draw();
+    textRenderManager.draw();
     mapsManager.draw();
+
 }
 
 //--------------------------------------------------------------
@@ -38,6 +40,7 @@ void ofApp::exit(){
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key) {
     mapsManager.keyPressed(key);
+    
 //    settingsManager.saveSettings();
 }
 
@@ -91,8 +94,7 @@ void ofApp::gotMessage(ofMessage msg) {
                 break;
                 
             case BTN_MSG_MIDI_IN_PORT_SET:
-                appSettings["midiInDevice"] =  appSettings["inPortLabel"].get<string>();
-                appSettings["midiInDeviceByString"] =  true;
+    
                 NDIManager.exit();
                 NDIManager.updateSettings();
                 NDIManager.setup();
@@ -103,8 +105,7 @@ void ofApp::gotMessage(ofMessage msg) {
                 break;
                 
             case BTN_MSG_MIDI_OUT_PORT_SET:
-                appSettings["midiOutDevice"] =  appSettings["outPortLabel"].get<string>();
-                appSettings["midiOutDeviceByString"] =  true;
+          
                 NDIManager.exit();
                 NDIManager.updateSettings();
                 NDIManager.setup();

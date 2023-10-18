@@ -43,6 +43,10 @@ public:
     void enableInteraction();
     std::string getSpecualtiveTime() {return specualtiveTime;};
     
+    static float timelineProgress;
+    static int mapZoom;
+
+    
 private:
     TimelineManager();
     ofxTimeline timeline;

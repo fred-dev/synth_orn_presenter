@@ -21,9 +21,9 @@ OscManager::~OscManager() {
 void OscManager::setup(){
     ofLogNotice("OscManager") << "OscManager setup";
 
-    oscSender.setup(OscManagerSettings["outgoingIpOSC"], OscManagerSettings["outGoingPortOsc"]);
+    oscSender.setup(OscManagerSettings["osc"]["outgoingIpOSC"], OscManagerSettings["osc"]["outGoingPortOsc"]);
     ofLogVerbose() << "OSC Sender initialised and set to port: " << oscSender.getPort() << " With host: " << oscSender.getHost() << endl;
-    oscReceiver.setup(OscManagerSettings["incomingPortOsc"]);
+    oscReceiver.setup(OscManagerSettings["osc"]["incomingPortOsc"]);
     ofLogVerbose() << "OSC Receiver initialised and set to port: " << oscReceiver.getPort() << endl;
     
     ofLogVerbose("OscManager") << "OscManager Setup complete";
@@ -32,7 +32,7 @@ void OscManager::setup(){
 void OscManager::closeReceiver(){
 }
 void OscManager::setupReceiver(){
-    oscReceiver.setup(OscManagerSettings["incomingPortOsc"]);
+    oscReceiver.setup(OscManagerSettings["osc"]["incomingPortOsc"]);
     ofLogVerbose() << "OSC Receiver initialised and set to port: " << oscReceiver.getPort() << endl;
     oscReceiver.start();
 
@@ -42,7 +42,7 @@ void OscManager::closeSender(){
     
 }
 void OscManager::setupSender(){
-    oscSender.setup(OscManagerSettings["outgoingIpOSC"], OscManagerSettings["outGoingPortOsc"]);
+    oscSender.setup(OscManagerSettings["osc"]["outgoingIpOSC"], OscManagerSettings["osc"]["outGoingPortOsc"]);
     ofLogVerbose() << "OSC Sender initialised and set to port: " << oscSender.getPort() << " With host: " << oscSender.getHost() << endl;
 
 }

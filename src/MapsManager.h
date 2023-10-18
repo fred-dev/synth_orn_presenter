@@ -13,6 +13,7 @@
 #include "SettingsManager.h" // Include the SettingsManager header
 #include "NDIManager.h"
 #include "ofxMaps.h"
+#include "TimelineManager.h"
 
 
 class MapsManager {
@@ -37,6 +38,7 @@ public:
 
     void updateSettings();
     void setMapsManagerSettings(const ofJson& newSettings);
+    static glm::vec2 currentMapPosition;
 private:
     MapsManager();
 
@@ -51,6 +53,8 @@ private:
     }
     
     ofFbo fbo;
+    
+    ofPolyline mapPath;
 
     std::shared_ptr<ofxMaps::MBTilesCache> bufferCache;
     std::shared_ptr<ofxMaps::MapTileLayer> tileLayer;
@@ -65,6 +69,10 @@ private:
 
     float animation = 0;
     
+    ofMesh createCustomLine(const ofPolyline& polyline, float lineWidth, int resolution);
+    glm::vec3 cubicBezier(const glm::vec3& p0, const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3, float t);
+
+
     NDIManager& ndiManager = NDIManager::getInstance();
 
 };

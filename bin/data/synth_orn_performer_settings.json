@@ -1,32 +1,139 @@
 {
-    "Log_level": 0,
-    "end_time_unix": 1729117179,
-    "font_path": "fonts/frabk.ttf",
-    "font_size_large": 28,
-    "font_size_medium": 20,
-    "font_size_small": 12,
-    "frameRate": 25,
-    "grapics_renderer_height": 200,
-    "grapics_renderer_width": 1000,
-    "incomingPortOsc": 12345,
-    "main_duration_seconds": 360,
-    "map_render_height": 600,
-    "map_render_width": 600,
-    "midiInChannel": 1,
-    "midiInDevice": 0,
-    "midiInDeviceByString": false,
-    "midiInDeviceNum": null,
-    "midiOutChannel": 1,
-    "midiOutDevice": 0,
-    "midiOutDeviceByString": false,
-    "midiOutDeviceNum": null,
+  "Log_level": 0,
+  "osc": {
     "outGoingPortOsc": 1234,
     "outgoingIpOSC": "127.0.0.1",
+    "incomingPortOsc": 12345
+  },
+  "timeline": {
+    "main_duration_seconds": 360,
+    "end_time_unix": 1729117179,
     "start_time_unix": 1697581179,
-    "text_renderer_1_height": 200,
-    "text_renderer_1_width": 1000,
-    "text_renderer_2_height": 200,
-    "text_renderer_2_width": 1000,
-    "timeline_years": 1,
-    "useVirtualPort": false
+    "timeline_years": 1
+  },
+  "renderer": {
+    "text_renderer_1_height": 100,
+    "text_renderer_1_width": 1200,
+    "text_renderer_2_height": 100,
+    "text_renderer_2_width": 1200,
+    "grapics_renderer_height": 200,
+    "grapics_renderer_width": 1000,
+    "font_path": "fonts/Courier New.ttf",
+    "font_size_large": 30,
+    "font_size_medium": 30,
+    "font_size_small": 12,
+    "map_render_height": 1200,
+    "map_render_width": 1200
+  },
+  "map": {
+    "points": [
+      {
+        "lat": -33.971125,
+        "lon": 151.252418
+      },
+      {
+        "lat": -35.14128,
+        "lon": 150.670794
+      },
+      {
+        "lat": -37.80691,
+        "lon": 145.507458
+      },
+      {
+        "lat": -34.732269,
+        "lon": 139.146382
+      },
+      {
+        "lat": -29.088671,
+        "lon": 134.937884
+      },
+      {
+        "lat": -23.89005,
+        "lon": 133.939217
+      },
+      {
+        "lat": -31.117161,
+        "lon": 130.032615
+      },
+      {
+        "lat": -33.5706,
+        "lon": 122.15805
+      },
+      {
+        "lat": -32.109976,
+        "lon": 116.308374
+      },
+      {
+        "lat": -23.26724,
+        "lon": 114.017591
+      },
+      {
+        "lat": -21.000716,
+        "lon": 119.966666
+      },
+      {
+        "lat": -17.943711,
+        "lon": 122.744788
+      },
+      {
+        "lat": -15.883685,
+        "lon": 128.643304
+      },
+      {
+        "lat": -12.607486,
+        "lon": 130.818194
+      },
+      {
+        "lat": -12.755096,
+        "lon": 135.712222
+      },
+      {
+        "lat": -18.286401,
+        "lon": 139.453783
+      },
+      {
+        "lat": -18.554965,
+        "lon": 141.333864
+      },
+      {
+        "lat": -12.835455,
+        "lon": 141.964701
+      },
+      {
+        "lat": -17.274462,
+        "lon": 145.721683
+      },
+      {
+        "lat": -19.768093,
+        "lon": 147.336066
+      }
+    ],
+    "mapCentre": [
+      {
+        "lat": -24.978199,
+        "lon": 133.100608
+      }
+    ],
+    "provider": {
+      "tilejson": "1.0.0",
+      "name": "OpenStreetMap",
+      "description": "A free editable map of the whole world.",
+      "version": "1.0.0",
+      "attribution": "(c) OpenStreetMap contributors, CC-BY-SA",
+      "scheme": "xyz",
+      "tiles": [
+        "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        "https://b.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        "https://c.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      ],
+      "minzoom": 0,
+      "maxzoom": 18,
+      "bounds": [
+        -180,
+        -85,
+        180,
+        85
+      ]
+    }
+  }
 }

@@ -13,7 +13,7 @@
 #include "SettingsManager.h" // Include the SettingsManager header
 #include "TimelineManager.h"
 #include "NDIManager.h"
-
+#include "MapsManager.h"
 
 class TextRenderManager {
 public:
@@ -43,6 +43,7 @@ private:
     ofJson TextRenderManagerSettings;
     ofTrueTypeFont smallFont, mediumFont, largeFont;
     ofFbo textFbo1, textFbo2;
+    std::string formatFloat(float value, int precision);
 
     // Function to handle settings changes
     void handleSettingsChange(const ofJson& updatedSettings) {

@@ -20,21 +20,17 @@ NDIManager::~NDIManager() {
 void NDIManager::setup(){
     ofLogNotice("NDIManager") << "NDIManager setup";
     
-    if (NDIManagerSettings["NDI"]["NDI_MAP_STREAM_LABEL"].is_string()) {
-        
-    }
-    
     mapSender.SetAsync();
-    mapSender.CreateSender(mapSenderName.c_str(), NDIManagerSettings["map_render_width"] , NDIManagerSettings["map_render_height"]);
+    mapSender.CreateSender(mapSenderName.c_str(), NDIManagerSettings["renderer"]["map_render_width"] , NDIManagerSettings["renderer"]["map_render_height"]);
     
     textSender1.SetAsync();
-    textSender1.CreateSender(textSenderName1.c_str(), NDIManagerSettings["text_renderer_1_width"] , NDIManagerSettings["text_renderer_1_height"]);
+    textSender1.CreateSender(textSenderName1.c_str(), NDIManagerSettings["renderer"]["text_renderer_1_width"] , NDIManagerSettings["renderer"]["text_renderer_1_height"]);
     
     textSender2.SetAsync();
-    textSender2.CreateSender(textSenderName2.c_str(), NDIManagerSettings["text_renderer_2_width"] , NDIManagerSettings["text_renderer_2_height"]);
+    textSender2.CreateSender(textSenderName2.c_str(), NDIManagerSettings["renderer"]["text_renderer_2_width"] , NDIManagerSettings["renderer"]["text_renderer_2_height"]);
     
     graphicsSender.SetAsync();
-    graphicsSender.CreateSender(graphicsSenderName.c_str(), NDIManagerSettings["grapics_renderer_width"] , NDIManagerSettings["grapics_renderer_height"]);
+    graphicsSender.CreateSender(graphicsSenderName.c_str(), NDIManagerSettings["renderer"]["grapics_renderer_width"] , NDIManagerSettings["renderer"]["grapics_renderer_height"]);
 
     
     ofLogVerbose("NDIManager") << "NDIManager Setup complete";
@@ -73,8 +69,8 @@ void NDIManager::setNDIManagerSettings(const ofJson& updatedSettings) {
         const ofJson& newValue = it.value();
         
         // Check if the new value is different from the current value
-        if (NDIManagerSettings[key] != newValue) {
-            NDIManagerSettings[key] = newValue;
+        if (NDIManagerSettings["renderer"][key] != newValue) {
+            NDIManagerSettings["renderer"][key] = newValue;
         }
     }
     
