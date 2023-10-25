@@ -22,34 +22,16 @@ MapsManager::~MapsManager() {
 
 void MapsManager::setup(){
     ofLogNotice("MapsManager") << "MapsManager setup";
-    
-    tileProvider = std::make_shared<ofxMaps::MapTileProvider>(ofxMaps::MapTileProvider::fromJSON(MapsManagerSettings["map"]["provider"]));
-    ofLogVerbose("MapsManager") << "tileProvider Setup complete";
-    
-    
-    Poco::ThreadPool::defaultPool().addCapacity(64);
-    bufferCache = std::make_shared<ofxMaps::MBTilesCache>(*tileProvider, "cache/");
-    
-    tileSet = std::make_shared<ofxMaps::MapTileSet>(1024,
-                                                    tileProvider,
-                                                    bufferCache);
-    tileLayer = std::make_shared<ofxMaps::MapTileLayer>(tileSet, MapsManagerSettings["renderer"]["map_render_width"], MapsManagerSettings["renderer"]["map_render_height"]);
-    
-    ofFboSettings s;
-    s.width = MapsManagerSettings["renderer"]["map_render_width"];
-    s.height = MapsManagerSettings["renderer"]["map_render_height"];
-    s.numColorbuffers = 2;
-    s.numSamples = 4;
-    fbo.allocate(s);
-    //fbo.allocate(MapsManagerSettings["renderer"]["map_render_width"], MapsManagerSettings["renderer"]["map_render_height"], GL_RGBA);
-    
-    //go through the settings and get the lat and lon values for all the points and add them to coordinates
-    for (auto point : MapsManagerSettings["map"]["points"]) {
-        coordinates.push_back({point["lat"], point["lon"]});
-    }
-    ofLogVerbose("MapsManager") << "coordinates Setup complete";
-    
+    setupTiles();
+    setupGraphicDimensions();
+    setupLights();
+    setupMaterials();
+    setupBezierPath();
+    mapFXShader.load("2d_fx_shaders/passThrough");
     tileLayer->setCenter(ofxGeo::Coordinate(MapsManagerSettings["map"]["mapCentre"]["lat"],MapsManagerSettings["map"]["mapCentre"]["lon"]), 4);
+    
+    myBezier.updatePixelCoordsFromGeo();
+
     
     ofLogVerbose("MapsManager") << "MapsManager Setup complete";
     
@@ -58,58 +40,118 @@ void MapsManager::setup(){
 
 void MapsManager::update(){
     tileLayer->update();
-    
-    if (!ofIsFloatEqual(animation, 0.f))
-        tileLayer->setCenter(tileLayer->getCenter().getNeighbor(animation, 0));
-    
-    fbo.begin();
-    ofClear(0,0,0,0);
-    tileLayer->draw(0, 0);
-    ofPushStyle();
-    ofNoFill();
-    ofSetColor(0, 255, 0);
-    
-    for (auto coordinate: coordinates)
-    {
-        auto tc = tileLayer->geoToPixels(coordinate);
-        ofDrawCircle(tc.x, tc.y, 2);
-    }
-    ofPopStyle();
-    ofSetColor(255, 0, 0);
-    mapPath.clear();
-    for (auto coordinate: coordinates)
-    {
-        auto tc = tileLayer->geoToPixels(coordinate);
-        mapPath.lineTo(tc.x, tc.y);
-    }
-    
-    currentMapPosition = glm::vec2( tileLayer->pixelsToGeo(mapPath.getPointAtPercent(TimelineManager::timelineProgress)).getLatitude(), tileLayer->pixelsToGeo(mapPath.getPointAtPercent(TimelineManager::timelineProgress)).getLongitude());
-    
-    
-    
-    ofPolyline mapPathPartial;
-    
-    
-    for (float i = 0; i < TimelineManager::timelineProgress; i += 0.001) {
-        mapPathPartial.curveTo(mapPath.getPointAtPercent(i),20); // Use curveTo
-    }
-    if(mapPathPartial.size() > 0){
-        tileLayer->setCenter(ofxGeo::Coordinate(tileLayer->pixelsToGeo(mapPathPartial.getPointAtPercent(1))), TimelineManager::mapZoom);
+    if(operationMode == PLAYER){
         
+        tileLayer->setCenter(ofxGeo::Coordinate(tileLayer->pixelsToGeo(myBezier.getPolyline().getPointAtPercent(TimelineManager::timelineProgress))), TimelineManager::mapZoom);
+        myBezier.updatePixelCoordsFromGeo();
+        
+        mapPathPartial.clear();
+        float lastIndex = myBezier.getPolyline().getIndexAtPercent(TimelineManager::timelineProgress);
+        //ofLogVerbose("MapsManager") << "lastIndex: " << lastIndex;
+
+        for (int i = 0; i <= floor(lastIndex); i++) {
+            if (!mapBoundsRect.inside(myBezier.getPolyline().getVertices()[i].x, myBezier.getPolyline().getVertices()[i].y)) {
+                mapPathPartial.addVertex(myBezier.getPolyline().getVertices()[i]);
+            }
+            mapPathPartial.addVertex(myBezier.getPolyline().getVertices()[i]);
+        }
+
+        // Calculate the number of points to interpolate
+        float lastSectionLength = lastIndex - floor(lastIndex);
+
+        // Interpolate and add the points between the last real index and the final interpolated index
+        for (int i = 1; i <= 10; i++) {
+            float index = floor(lastIndex) + (i * lastSectionLength/10);
+            ofVec3f interpolatedPoint = myBezier.getPolyline().getPointAtIndexInterpolated(index);
+            if (mapBoundsRect.inside(interpolatedPoint.x, interpolatedPoint.y)) {
+                mapPathPartial.addVertex(interpolatedPoint);
+            }
+        }
+        mapPathMesh.clear();
+        mapPathMesh = myBezier.getTubeMeshFromPolyline(mapPathPartial);
+        currentMapPosition = glm::vec2( tileLayer->pixelsToGeo(mapPath.getPointAtPercent(TimelineManager::timelineProgress)).getLatitude(), tileLayer->pixelsToGeo(mapPath.getPointAtPercent(TimelineManager::timelineProgress)).getLongitude());
+        //    if (!ofIsFloatEqual(animation, 0.f))
+        //        tileLayer->setCenter(tileLayer->getCenter().getNeighbor(animation, 0));
     }
-    ofSetColor(255, 0, 0);
-    createCustomLine(mapPathPartial.getSmoothed(30), TimelineManager::mapZoom, 20).draw();
+    mapFbo.begin();
+    ofClear(0,0,0,0);
+    if(operationMode == PLAYER){
+        ofRotateYDeg(180);
+        ofTranslate(-MapsManagerSettings["renderer"]["map_render_width"].get<float>(),0);
+    }
+  
+//    mapFXShader.begin();
+//    mapFXShader.setUniform1i        ("trueWidth"    ,int(MapsManagerSettings["renderer"]["map_draw_width"]));
+//    mapFXShader.setUniform1i        ("trueHeight"    ,int(MapsManagerSettings["renderer"]["map_draw_height"]));
+//    mapFXShader.setUniform1f        ("rand"            ,ofRandom(1));
+//    mapFXShader.setUniform1f        ("mouseX"        ,ofGetMouseX());
+//    mapFXShader.setUniform1f        ("mouseY"        ,ofGetMouseY());
+//    mapFXShader.setUniform1f        ("val1"            ,ofRandom(100));
+//    mapFXShader.setUniform1f        ("val2"            ,ofRandom(100));
+//    mapFXShader.setUniform1f        ("val3"            ,ofRandom(100));
+//    mapFXShader.setUniform1f        ("val4"            ,ofRandom(100));
+//    mapFXShader.setUniform1f        ("timer"        ,ofGetElapsedTimef());
+//    mapFXShader.setUniform1i("range", int(ofRandom(100)));
     
-    fbo.end();
-    ndiManager.getMapSender().SendImage(fbo);
+    tileLayer->draw(0, 0);
+    
+    //mapFXShader.end();
+    mapFbo.end();
+    
+    
+    
+    
+    
+    if(MapsManagerSettings["NDI"]["enable_NDI"].get<bool>()){
+        ndiManager.getMapSender().SendImage(mapSceneFbo);
+    }
 }
 
 void MapsManager::draw(){
-    
-    fbo.draw(ofGetWidth() -600, ofGetHeight()-600, 600,600);
-    ofDrawBitmapStringHighlight(tileLayer->getCenter().toString(0), 14, ofGetHeight() - 32);
-    ofDrawBitmapStringHighlight("Task Queue:" + ofx::TaskQueue::instance().toString(), 14, ofGetHeight() - 16);
-    ofDrawBitmapStringHighlight("Connection Pool: " + bufferCache->toString(), 14, ofGetHeight() - 2);
+    if(operationMode == PLAYER){
+        ofEnableDepthTest();
+        if( light.shouldRenderShadowDepthPass() ) {
+            int numShadowPasses = light.getNumShadowDepthPasses();
+            for( int j = 0; j < numShadowPasses; j++ ) {
+                light.beginShadowDepthPass(j);
+                renderScene(true);
+                light.endShadowDepthPass(j);
+            }
+        }
+        
+        
+        mapSceneFbo.begin();
+        mapSceneCam.begin();{
+            ofClear(0,0,0,0);
+            renderScene(false);
+            
+            if( cubeMap.hasPrefilteredMap() ) {
+                cubeMap.drawPrefilteredCube(0.2f);
+            }
+            
+        } mapSceneCam.end();
+        
+        mapSceneFbo.end();
+        
+        ofDisableDepthTest();
+        mapSceneFbo.draw(MapsManagerSettings["renderer"]["map_draw_x_pos"], MapsManagerSettings["renderer"]["map_draw_y_pos"], MapsManagerSettings["renderer"]["map_draw_width"], MapsManagerSettings["renderer"]["map_draw_height"]);
+    }
+    else if(operationMode == EDITOR){
+        ofSetColor(255);
+        
+        mapFbo.draw(0,0);
+        ofPushStyle();
+        if(!bdrawBezierInfo){
+            myBezier.getTubeMesh().draw();
+        }
+        else{
+            myBezier.drawHelp();
+        }
+        ofPopStyle();
+    }
+//    ofDrawBitmapStringHighlight(tileLayer->getCenter().toString(0), 14, ofGetHeight() - 32);
+//    ofDrawBitmapStringHighlight("Task Queue:" + ofx::TaskQueue::instance().toString(), 14, ofGetHeight() - 16);
+//    ofDrawBitmapStringHighlight("Connection Pool: " + bufferCache->toString(), 14, ofGetHeight() - 2);
 }
 
 void MapsManager::exit(){
@@ -145,33 +187,41 @@ void MapsManager::setMapsManagerSettings(const ofJson& updatedSettings) {
 
 void MapsManager::keyPressed(int key){
     
-    if (key == 'f' || key == 'F')
-    {
-        ofToggleFullscreen();
-    }
-    else if (key == '-')
+    if (key == '-')
     {
         tileLayer->setCenter(tileLayer->getCenter().getZoomedBy(-1));
+        myBezier.updatePixelCoordsFromGeo();
+
     }
     else if (key == '=')
     {
         tileLayer->setCenter(tileLayer->getCenter().getZoomedBy(1));
+        myBezier.updatePixelCoordsFromGeo();
+
     }
     else if (key == 'w')
     {
         tileLayer->setCenter(tileLayer->getCenter().getNeighborUp());
+        myBezier.updatePixelCoordsFromGeo();
+
     }
     else if (key == 'a')
     {
         tileLayer->setCenter(tileLayer->getCenter().getNeighborLeft());
+        myBezier.updatePixelCoordsFromGeo();
+
     }
     else if (key == 's')
     {
         tileLayer->setCenter(tileLayer->getCenter().getNeighborDown());
+        myBezier.updatePixelCoordsFromGeo();
+
     }
     else if (key == 'd')
     {
         tileLayer->setCenter(tileLayer->getCenter().getNeighborRight());
+        myBezier.updatePixelCoordsFromGeo();
+
     }
     else if (key == '1')
     {
@@ -181,68 +231,195 @@ void MapsManager::keyPressed(int key){
     {
         animation += 0.01;;
     }
+    else if (key == 'r')
+    {
+        reloadShader();
+    }
+    else if (key == 'W')
+    {
+        bWiggleVerts = !bWiggleVerts;
+    }
     else if (key == '3')
     {
         animation = 0;
     }
-    
-}
-ofMesh MapsManager::createCustomLine(const ofPolyline& polyline, float lineWidth, int resolution) {
-    ofMesh customLineMesh;
-    
-    vector<glm::vec3> linePoints = polyline.getVertices();
-    if (linePoints.size() < 2) {
-        // The polyline must have at least two points to create a line
-        return customLineMesh;
+    else if (key == 'h')
+    {
+        bdrawBezierInfo = !bdrawBezierInfo;
     }
-    
-    for (size_t i = 0; i < linePoints.size() - 1; ++i) {
-        glm::vec3 p0 = linePoints[i];
-        glm::vec3 p1 = linePoints[i + 1];
-        
-        // Calculate the direction from the current point to the next point
-        glm::vec3 dir = glm::normalize(p1 - p0);
-        
-        // Calculate the perpendicular vector (adjust line width here)
-        glm::vec3 offset = glm::vec3(-dir.y, dir.x, 0) * (lineWidth / 2.0);
-        
-        for (int j = 0; j < resolution; ++j) {
-            float t = static_cast<float>(j) / (resolution - 1);
+  
+    else if(key == OF_KEY_UP){
+        if(operationMode == EDITOR){
+            setMapSize(MapsManagerSettings["renderer"]["map_render_width"], MapsManagerSettings["renderer"]["map_render_height"]);
+            myBezier.updatePixelCoordsFromGeo();
+            operationMode = PLAYER;
             
-            // Calculate control points for the cubic Bezier curve
-            glm::vec3 cp1 = p0 + offset;
-            glm::vec3 cp2 = p1 + offset;
-            
-            // Interpolate along the Bezier curve
-            glm::vec3 point = cubicBezier(p0, cp1, cp2, p1, t);
-            
-            // Offset the point to create the curve
-            glm::vec3 vertex1 = point + offset;
-            glm::vec3 vertex2 = point - offset;
-            
-            // Add vertices to the mesh
-            customLineMesh.addVertex(vertex1);
-            customLineMesh.addVertex(vertex2);
+        }
+        else if(operationMode == PLAYER){
+            setMapSize(ofGetWidth(), ofGetHeight());
+           
+            operationMode = EDITOR;
+            ofxGeo::Coordinate centre(-24.978199, 133.100608);
+            tileLayer->setCenter(centre, 5);
+            myBezier.updatePixelCoordsFromGeo();
+
         }
     }
     
-    // Set the draw mode to triangle strip
-    customLineMesh.setMode(OF_PRIMITIVE_TRIANGLE_STRIP);
-    
-    return customLineMesh;
 }
 
-glm::vec3 MapsManager::cubicBezier(const glm::vec3& p0, const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3, float t) {
-    float u = 1.0f - t;
-    float tt = t * t;
-    float uu = u * u;
-    float uuu = uu * u;
-    float ttt = tt * t;
+void MapsManager::setupTiles(){
+    ofLogVerbose("MapsManager::setupTiles") << "tileProvider Setup start";
     
-    glm::vec3 p = uuu * p0; // (1-t)^3 * p0
-    p += 3.0f * uu * t * p1; // 3(1-t)^2 * t * p1
-    p += 3.0f * u * tt * p2; // 3(1-t) * t^2 * p2
-    p += ttt * p3; // t^3 * p3
+    tileProvider = std::make_shared<ofxMaps::MapTileProvider>(ofxMaps::MapTileProvider::fromJSON(MapsManagerSettings["map"]["provider"]));
+    Poco::ThreadPool::defaultPool().addCapacity(64);
+    bufferCache = std::make_shared<ofxMaps::MBTilesCache>(*tileProvider, "cache/");
+    tileSet = std::make_shared<ofxMaps::MapTileSet>(1024,
+                                                    tileProvider,
+                                                    bufferCache);
+    tileLayer = std::make_shared<ofxMaps::MapTileLayer>(tileSet, MapsManagerSettings["renderer"]["map_render_width"], MapsManagerSettings["renderer"]["map_render_height"]);
+    ofLogVerbose("MapsManager::setupTiles") << "tileProvider Setup complete";
     
-    return p;
+}
+void MapsManager::setupGraphicDimensions(){
+    ofLogVerbose("MapsManager::setupGraphicDimensions") << "Setup graphics start";
+    
+    ofFboSettings mapFboS;
+    mapFboS.width = MapsManagerSettings["renderer"]["map_render_width"];
+    mapFboS.height = MapsManagerSettings["renderer"]["map_render_height"];
+    mapFbo.allocate(mapFboS);
+    
+    ofFboSettings mapSceneFboS;
+    mapSceneFboS.width = MapsManagerSettings["renderer"]["map_render_width"];
+    mapSceneFboS.height = MapsManagerSettings["renderer"]["map_render_height"];
+    mapSceneFboS.useDepth = true;
+    mapSceneFboS.useStencil = true;
+    mapSceneFbo.allocate(mapSceneFboS);
+    
+    mapSceneCam.setControlArea(ofRectangle(MapsManagerSettings["renderer"]["map_draw_x_pos"], MapsManagerSettings["renderer"]["map_draw_y_pos"], MapsManagerSettings["renderer"]["map_draw_width"], MapsManagerSettings["renderer"]["map_draw_height"]));
+            
+    mapBoundsRect.set(0, 0, MapsManagerSettings["renderer"]["map_render_width"], MapsManagerSettings["renderer"]["map_render_height"]);
+    
+    
+    ofLogVerbose("MapsManager::setupGraphicDimensions") << "Setup graphics complete";
+    
+}
+
+void MapsManager::setupMaterials(){
+    ofLogVerbose("MapsManager::setupMaterials") << "Materials Setup begin";
+    
+    
+    tubeMaterial.setCustomUniform1f("iElapsedTime", 1.0);
+    //    // set the material to PBR, default if phong
+    tubeMaterial.setPBR(true);
+    
+    matFloor.setPBR(true);
+    
+    // try commenting this out to see the effect that cube maps have on lighting
+    // https://polyhaven.com/a/kloppenheim_06_puresky
+    cubeMap.load( "kloppenheim_06_puresky_1k.exr", 512 );
+    
+    matFloor.setMetallic(0.0);
+    matFloor.setReflectance(0.01);
+    matFloor.setRoughness(0.8);
+    
+    matFloor.setTexture(OF_MATERIAL_TEXTURE_DIFFUSE, mapFbo.getTexture());
+    matFloor.setTexture(OF_MATERIAL_TEXTURE_EMISSIVE, mapFbo.getTexture());
+
+    reloadShader();
+    
+    ofLogVerbose("MapsManager::setupMaterials") << "Materials Setup complete";
+    
+}
+void MapsManager::setupLights(){
+    ofLogVerbose("MapsManager::setupLights") << "Light Setup begin";
+    
+    
+    light.setDirectional();
+    light.enable();
+    light.setPosition(100.1, 400, 600 );
+    light.lookAt(glm::vec3(0,0,0));
+    light.getShadow().setEnabled(true);
+    light.getShadow().setGlCullingEnabled(true);
+    light.getShadow().setDirectionalBounds(2000, 1000);
+    light.getShadow().setNearClip(200);
+    light.getShadow().setFarClip(2000);
+    light.getShadow().setStrength(1.0);
+    // increase alpha value to increase strength of light
+    light.setDiffuseColor(ofFloatColor(1.0, 2.0));
+    light.getShadow().setShadowType(OF_SHADOW_TYPE_PCF_MED);
+    ofLogVerbose("MapsManager::setupLights") << "Light Setup complete";
+    
+}
+void MapsManager::renderScene(bool bShadowPass){
+    
+    matFloor.begin();
+    ofDrawBox(0, -275, 0, MapsManagerSettings["renderer"]["map_render_width"].get<float>() *2, 1 ,MapsManagerSettings["renderer"]["map_render_height"].get<float>()*2);
+    
+    matFloor.end();
+    
+
+    
+    if( !tubeMaterial.hasDepthShader() && bShadowPass && bWiggleVerts ) {
+        mDepthShader.begin();
+        mDepthShader.setUniform1f("iElapsedTime", ofGetElapsedTimef());
+        mDepthShader.setUniform1f("uWiggleVerts", bWiggleVerts ? 1.0f : 0.0f);
+    }
+    // setting custom uniforms on a material automatically adds it to the shader
+    tubeMaterial.setCustomUniform1f("iElapsedTime", ofGetElapsedTimef());
+    tubeMaterial.setCustomUniform1f("uWiggleVerts", bWiggleVerts ? 1.0f : 0.0f);
+    tubeMaterial.begin();
+    
+    //Draw the tube here
+    ofPushMatrix();
+    ofScale(-2,-2,-2);
+    
+    ofRotateX(90);
+    ofTranslate(-MapsManagerSettings["renderer"]["map_render_width"].get<float>()/2, -MapsManagerSettings["renderer"]["map_render_width"].get<float>()/2, -100);
+    mapPathMesh.draw();
+    ofPopMatrix();
+    
+    tubeMaterial.end();
+    if(!tubeMaterial.hasDepthShader() && bShadowPass && bWiggleVerts ) {
+        mDepthShader.end();
+    }
+}
+
+bool MapsManager::reloadShader(){
+    // load the shader main functions //
+    string vname = "shaders/main.vert";
+    ofBuffer vbuffer = ofBufferFromFile(vname);
+    string fname = "shaders/main.frag";
+    ofBuffer fbuffer = ofBufferFromFile(fname);
+    if( vbuffer.size() && fbuffer.size() ) {
+        tubeMaterial.setShaderMain(vbuffer.getText(), GL_VERTEX_SHADER, "main.vert");
+        tubeMaterial.setShaderMain(fbuffer.getText(), GL_FRAGMENT_SHADER, "main.frag");
+        tubeMaterial.setDepthShaderMain(vbuffer.getText(), "main.glsl");
+        // configure the shader to include shadow functions for passing depth
+        // #define OF_SHADOW_DEPTH_PASS gets added by OF so we can use the same shader file and run different bits of code for the shadow pass
+        // we add #define NON_MATERIAL_DEPTH_PASS because ofMaterial adds variables that we need
+        // to add manually when not using a materil, see main.vert
+        //        light.getShadow().setupShadowDepthShader(mDepthShader, "#define NON_MATERIAL_DEPTH_PASS\n"+vbuffer.getText());
+        return true;
+    }
+    return false;
+}
+
+std::shared_ptr<glm::vec2> MapsManager::coordsToPixelsConvertor(glm::vec2 coords) {
+    auto result = std::make_shared<glm::vec2>(tileLayer->geoToPixels(ofxGeo::Coordinate(coords)));
+    return result;
+}
+
+std::shared_ptr<glm::vec2> MapsManager::pixelsToCoordsConvertor(glm::vec2 pixels) {
+    ofxGeo::Coordinate geoCoords = tileLayer->pixelsToGeo(pixels);
+    auto result = std::make_shared<glm::vec2>(geoCoords.getLatitude(), geoCoords.getLongitude());
+    return result;
+}
+void MapsManager::setupBezierPath(){
+    myBezier.loadPoints("ofxBezierInfo.json");
+    bdrawBezierInfo = false;
+}
+void MapsManager::setMapSize(float width, float height){
+    tileLayer->setSize(glm::vec2(width, height));
+    mapFbo.allocate(width, height);
 }

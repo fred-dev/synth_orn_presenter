@@ -36,6 +36,10 @@ void SettingsManager::loadSettings(const std::string& filename) {
         
         loadSettingsFromJSON("renderer","map_render_width");
         loadSettingsFromJSON("renderer","map_render_height");
+        loadSettingsFromJSON("renderer","map_draw_width");
+        loadSettingsFromJSON("renderer","map_draw_height");
+        loadSettingsFromJSON("renderer","map_draw_x_pos");
+        loadSettingsFromJSON("renderer","map_draw_y_pos");
         loadSettingsFromJSON("renderer","text_renderer_1_width");
         loadSettingsFromJSON("renderer","text_renderer_1_height");
         loadSettingsFromJSON("renderer","text_renderer_2_width");
@@ -50,9 +54,16 @@ void SettingsManager::loadSettings(const std::string& filename) {
         loadSettingsFromJSON("osc","incomingPortOsc");
         loadSettingsFromJSON("osc","outGoingPortOsc");
         loadSettingsFromJSON("osc","outgoingIpOSC");
-        loadSettingsFromJSON("map", "mapCentre", "lat");
-        loadSettingsFromJSON("map", "mapCentre", "lon");
+//        loadSettingsFromJSON("map", "mapCentre", "lat");
+//        loadSettingsFromJSON("map", "mapCentre", "lon");
+        loadSettingsFromJSON("NDI","map_sender_name");
+        loadSettingsFromJSON("NDI","GFX_sender_name");
+        loadSettingsFromJSON("NDI","text_1_sender_name");
+        loadSettingsFromJSON("NDI","text_2_sender_name");
+        loadSettingsFromJSON("NDI","enable_NDI");
+
         
+
     } else {
         ofLogError("SettingsManager::LoadSettings") << "Settings file not found: " << filename;
         setDefaultSettings();
@@ -75,6 +86,10 @@ void SettingsManager::setDefaultSettings() {
     setDefaultSetting(settings["timeline"], "main_duration_seconds", 6000);
     setDefaultSetting(settings["renderer"], "map_render_width", 600);
     setDefaultSetting(settings["renderer"], "map_render_height", 600);
+    setDefaultSetting(settings["renderer"], "map_draw_width", 600);
+    setDefaultSetting(settings["renderer"], "map_draw_height", 600);
+    setDefaultSetting(settings["renderer"], "map_draw_x_pos", 1320);
+    setDefaultSetting(settings["renderer"], "map_draw_y_pos", 480);
     setDefaultSetting(settings["renderer"], "text_renderer_1_width", 1000);
     setDefaultSetting(settings["renderer"], "text_renderer_1_height", 200);
     setDefaultSetting(settings["renderer"], "text_renderer_2_width", 1000);
@@ -88,8 +103,14 @@ void SettingsManager::setDefaultSettings() {
     setDefaultSetting(settings["osc"], "incomingPortOsc", 12345);
     setDefaultSetting(settings["osc"], "outGoingPortOsc", 1234);
     setDefaultSetting(settings["osc"], "outgoingIpOSC", "127.0.0.1");
-    setDefaultSetting(settings["map"], "mapCentre", ofJson::array({{ "lat", 0.0 }, { "lon", 0.0 }}));
+        //setDefaultSetting(settings["map"], "mapCentre", ofJson::array({{ "lat", 0.0 }, { "lon", 0.0 }}));
+    setDefaultSetting(settings["NDI"], "map_sender_name", "mapNDISend");
+    setDefaultSetting(settings["NDI"], "GFX_sender_name", "GFXNDISend");
+    setDefaultSetting(settings["NDI"], "text_1_sender_name", "text1NDISend");
+    setDefaultSetting(settings["NDI"], "text_2_sender_name", "text2NDISend");
+    setDefaultSetting(settings["NDI"], "enable_NDI", false);
 
+    
     
 }
 

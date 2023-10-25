@@ -23,7 +23,18 @@
     "font_size_medium": 30,
     "font_size_small": 12,
     "map_render_height": 1200,
-    "map_render_width": 1200
+    "map_render_width": 1200,
+    "map_draw_width": 600,
+    "map_draw_height": 600,
+    "map_draw_x_pos": 1320,
+    "map_draw_y_pos": 480
+  },
+  "NDI":{
+    "enable_NDI": false,
+    "map_sender_name": "mapNDISend",
+    "GFX_sender_name": "GFXNDISend",
+    "text_1_sender_name": "text1NDISend",
+    "text_2_sender_name": "text2NDISend"
   },
   "map": {
     "points": [
@@ -119,7 +130,6 @@
       "description": "A free editable map of the whole world.",
       "version": "1.0.0",
       "attribution": "(c) OpenStreetMap contributors, CC-BY-SA",
-      "scheme": "xyz",
       "tiles": [
         "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png",
         "https://b.tile.openstreetmap.org/{z}/{x}/{y}.png",

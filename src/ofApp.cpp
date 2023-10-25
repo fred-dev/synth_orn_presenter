@@ -6,7 +6,7 @@ void ofApp::setup() {
     ofBackground(255*.15);
     ofSetVerticalSync(true);
     ofEnableSmoothing();
-    
+    ofDisableArbTex();
     settingsManager.loadSettings("synth_orn_performer_settings.json");
     appSettings = settingsManager.getSettings();
     NDIManager.setup();
@@ -14,6 +14,11 @@ void ofApp::setup() {
     mapsManager.setup();
     timelineManager.setup();
     textRenderManager.setup();
+    
+    ofLogVerbose() << "Main entry point all Setup complete";
+    
+    mode = 0;
+    
 }
 
 //--------------------------------------------------------------
@@ -27,9 +32,15 @@ void ofApp::update() {
 
 //--------------------------------------------------------------
 void ofApp::draw() {
-    timelineManager.draw();
-    textRenderManager.draw();
-    mapsManager.draw();
+    if(mode == 0){
+        timelineManager.draw();
+        textRenderManager.draw();
+        mapsManager.draw();
+    }
+       
+       else{
+        mapsManager.draw();
+    }
 
 }
 
@@ -39,7 +50,25 @@ void ofApp::exit(){
 }
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key) {
-    mapsManager.keyPressed(key);
+        if(key=='1'){
+            mode = 0;
+            timelineManager.enableInteraction();
+        }
+        if(key=='2'){
+            mode = 1;
+            timelineManager.disableInteraction();
+        }
+        
+        if(mode==0){
+            mapsManager.keyPressed(key);
+            timelineManager.keyPressed(key);
+        }
+        else{
+            mapsManager.keyPressed(key);
+
+        }
+        
+
     
 //    settingsManager.saveSettings();
 }

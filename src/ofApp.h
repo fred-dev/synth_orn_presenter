@@ -84,7 +84,7 @@ public:
     
     Colours colours;
     
-    
+    int mode = 0;
     
 };
 

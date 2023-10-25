@@ -13,6 +13,7 @@
 #include "SettingsManager.h" // Include the SettingsManager header
 #include "ofxTextInputField.h"
 #include "ofxTimeline.h"
+#include "MapsManager.h"
 #include <iostream>
 #include <ctime>
 #include <chrono>
@@ -33,7 +34,9 @@ public:
     void update();
     void draw();
     void exit();
+    void keyPressed(int key);
 
+    
     // Public destructor
     ~TimelineManager();
 
@@ -51,6 +54,7 @@ private:
     TimelineManager();
     ofxTimeline timeline;
     void bangFired(ofxTLBangEventArgs& args);
+    ofxTLCameraTrack* cameraTrack;
 
     ofJson TimelineManagerSettings;
     
@@ -64,6 +68,7 @@ private:
         // Perform any other actions you need to do when settings change
         // This function will be called automatically when settings change.
     }
+    
     
 };
 

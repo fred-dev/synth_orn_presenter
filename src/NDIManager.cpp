@@ -19,19 +19,18 @@ NDIManager::~NDIManager() {
 
 void NDIManager::setup(){
     ofLogNotice("NDIManager") << "NDIManager setup";
-    
     mapSender.SetAsync();
-    mapSender.CreateSender(mapSenderName.c_str(), NDIManagerSettings["renderer"]["map_render_width"] , NDIManagerSettings["renderer"]["map_render_height"]);
+    mapSender.CreateSender(NDIManagerSettings["NDI"]["map_sender_name"].get<std::string>().c_str(), NDIManagerSettings["renderer"]["map_render_width"] , NDIManagerSettings["renderer"]["map_render_height"]);
     
     textSender1.SetAsync();
-    textSender1.CreateSender(textSenderName1.c_str(), NDIManagerSettings["renderer"]["text_renderer_1_width"] , NDIManagerSettings["renderer"]["text_renderer_1_height"]);
+    textSender1.CreateSender(NDIManagerSettings["NDI"]["text_1_sender_name"].get<std::string>().c_str(), NDIManagerSettings["renderer"]["text_renderer_1_width"] , NDIManagerSettings["renderer"]["text_renderer_1_height"]);
     
     textSender2.SetAsync();
-    textSender2.CreateSender(textSenderName2.c_str(), NDIManagerSettings["renderer"]["text_renderer_2_width"] , NDIManagerSettings["renderer"]["text_renderer_2_height"]);
+    textSender2.CreateSender(NDIManagerSettings["NDI"]["text_2_sender_name"].get<std::string>().c_str(), NDIManagerSettings["renderer"]["text_renderer_2_width"] , NDIManagerSettings["renderer"]["text_renderer_2_height"]);
     
     graphicsSender.SetAsync();
-    graphicsSender.CreateSender(graphicsSenderName.c_str(), NDIManagerSettings["renderer"]["grapics_renderer_width"] , NDIManagerSettings["renderer"]["grapics_renderer_height"]);
-
+    graphicsSender.CreateSender(NDIManagerSettings["NDI"]["GFX_sender_name"].get<std::string>().c_str(), NDIManagerSettings["renderer"]["grapics_renderer_width"] , NDIManagerSettings["renderer"]["grapics_renderer_height"]);
+    
     
     ofLogVerbose("NDIManager") << "NDIManager Setup complete";
     

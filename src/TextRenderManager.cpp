@@ -58,8 +58,11 @@ void TextRenderManager::update(){
     mediumFont.drawString("Location Lat: " + ofToString(formatFloat(MapsManager::currentMapPosition.x, 4)) + " Lon: " + ofToString(formatFloat(MapsManager::currentMapPosition.y, 4)), 50, 50);
     textFbo2.end();
     
-    NDIManager::getInstance().getTextSender1().SendImage(textFbo1);
-    NDIManager::getInstance().getTextSender2().SendImage(textFbo2);
+    if(TextRenderManagerSettings["NDI"]["enable_NDI"].get<bool>()){
+        NDIManager::getInstance().getTextSender1().SendImage(textFbo1);
+        NDIManager::getInstance().getTextSender2().SendImage(textFbo2);
+    }
+
 }
 
 void TextRenderManager::draw(){

@@ -47,6 +47,16 @@ void TimelineManager::setup(){
     
     ofAddListener(timeline.events().bangFired, this, &TimelineManager::bangFired);
     
+    MapsManager& mapsManager = MapsManager::getInstance(); // Get an instance of MapsManager
+    ofEasyCam& mapSceneCam = mapsManager.getMapSceneCam();
+    cameraTrack = new ofxTLCameraTrack();
+    cameraTrack->setCamera(mapSceneCam);
+    timeline.addTrack("Camera", cameraTrack);
+    
+    cameraTrack->lockCameraToTrack = true;
+    
+    
+    
     ofLogVerbose("TimelineManager") << "TimelineManager Setup complete";
     
 }
@@ -120,5 +130,14 @@ std::string TimelineManager::unixTimeToHumanReadable(long long unixTime) {
     std::string timeStr = std::ctime(&tt);
 
     return timeStr;
+}
+
+void TimelineManager::keyPressed(int key){
+    if(key == 'L'){
+            cameraTrack->lockCameraToTrack = !cameraTrack->lockCameraToTrack;
+        }
+        else if(key == 'T'){
+            cameraTrack->addKeyframe();
+        }
 }
 

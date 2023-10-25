@@ -23,3 +23,4 @@ ofxTimecode
 ofxXmlSettings
 ofxTween
 ofxTimeline
+ofxTubePrimitive
