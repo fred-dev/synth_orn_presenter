@@ -10,6 +10,8 @@
 #include "ofxBezierEditor.h"
 #include "TextRenderManager.h"
 
+#define TIMELINE_AUDIO_INCLUDED
+
 enum OperationMode {
     MODE_SETTING_MIDI_IN,
     MODE_SETTING_MIDI_OUT,

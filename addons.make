@@ -5,6 +5,7 @@ ofxIO
 ofxSQLiteCpp
 ofxTaskQueue
 ofxCache
+ofxFmod3DSoundPlayer
 ofxGeo
 ofxGui
 ofxSSLManager
@@ -23,4 +24,3 @@ ofxTimecode
 ofxXmlSettings
 ofxTween
 ofxTimeline
-ofxTubePrimitive

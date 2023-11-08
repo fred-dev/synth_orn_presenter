@@ -48,7 +48,7 @@ void TextRenderManager::update(){
     textFbo1.begin();
     ofClear(0,0,0);
     ofSetColor(85, 186,54);
-    largeFont.drawString("Current date: " + speculativeDate, 50, 50);
+    largeFont.drawString("Current date: " + speculativeDate + "frame rate: " + ofToString(ofGetFrameRate()), 50, 50);
     textFbo1.end();
     
     

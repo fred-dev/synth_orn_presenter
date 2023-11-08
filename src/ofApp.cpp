@@ -4,7 +4,6 @@
 void ofApp::setup() {
     ofSetLogLevel(OF_LOG_VERBOSE);
     ofBackground(255*.15);
-    ofSetVerticalSync(true);
     ofEnableSmoothing();
     ofDisableArbTex();
     settingsManager.loadSettings("synth_orn_performer_settings.json");

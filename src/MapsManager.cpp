@@ -98,10 +98,6 @@ void MapsManager::update(){
     //mapFXShader.end();
     mapFbo.end();
     
-    
-    
-    
-    
     if(MapsManagerSettings["NDI"]["enable_NDI"].get<bool>()){
         ndiManager.getMapSender().SendImage(mapSceneFbo);
     }
@@ -324,7 +320,7 @@ void MapsManager::setupMaterials(){
     matFloor.setRoughness(0.8);
     
     matFloor.setTexture(OF_MATERIAL_TEXTURE_DIFFUSE, mapFbo.getTexture());
-    matFloor.setTexture(OF_MATERIAL_TEXTURE_EMISSIVE, mapFbo.getTexture());
+    matFloor.setTexture(OF_MATERIAL_TEXTURE_SPECULAR, mapFbo.getTexture());
 
     reloadShader();
     
@@ -377,6 +373,7 @@ void MapsManager::renderScene(bool bShadowPass){
     ofRotateX(90);
     ofTranslate(-MapsManagerSettings["renderer"]["map_render_width"].get<float>()/2, -MapsManagerSettings["renderer"]["map_render_width"].get<float>()/2, -100);
     mapPathMesh.draw();
+    
     ofPopMatrix();
     
     tubeMaterial.end();
